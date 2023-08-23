@@ -2,19 +2,17 @@ package database
 
 import (
 	"context"
-	"database/sql"
+
 	"fmt"
 	"github.com/jackc/pgx/v4"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
-	"time"
 )
 
 //tolko soedinenie
 
 type DataBase struct {
-	Conn *sql.DB
+	Conn *pgx.Conn
 }
 
 //some info for database
@@ -28,7 +26,7 @@ type DBconfig struct {
 	//connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable search_path=%s", dbUser, dbPassword, dbName, schemeName)
 }
 
-func NewDataBase(config DBconfig) (*DataBase, error) {
+/*func NewDataBase(config DBconfig) (*DataBase, error) {
 	//connecting to .env to get credentials
 	err := godotenv.Load()
 	if err != nil {
@@ -61,10 +59,40 @@ func NewDataBase(config DBconfig) (*DataBase, error) {
 	}
 	fmt.Println("The connection has been accomplished")
 	return &DataBase{Conn: conn}, nil
+}*/
+
+func NewDataBase(config DBconfig) (*DataBase, error) {
+	//connecting to .env to get credentials
+	/*err := godotenv.Load("/home/alex/GolandProjects/WB/bwTechLvl0/database/config.env")
+	if err != nil {
+		return nil, err
+	}*/
+	dbConfig := DBconfig{
+		DBUser:       os.Getenv("DB_USER"),
+		DBPassword:   os.Getenv("DB_PASSWORD"),
+		DBName:       os.Getenv("DB_NAME"),
+		DBSchemeName: os.Getenv("DB_SHEME_NAME"),
+	}
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable search_path=%s",
+		dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBName, dbConfig.DBSchemeName)
+	//connecting to my database
+	conn, err := pgx.Connect(context.Background(), connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close(context.Background())
+
+	//checking the connection
+	err = conn.Ping(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("The connection has been accomplished")
+	return &DataBase{Conn: conn}, nil
 }
 
 func (db *DataBase) Close() error {
-	return db.Conn.Close()
+	return db.Conn.Close(context.Background())
 }
 
 //vinesti v repositories

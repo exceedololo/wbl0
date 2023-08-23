@@ -1,4 +1,4 @@
-package bwTechLvl0
+package main
 
 import (
 	"bwTechLvl0/internal/database"
@@ -17,6 +17,13 @@ var cacheMutex sync.RWMutex
 
 func main() {
 	//dbUser := os.Getenv("DB_USER")
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error getting current working directory:", err)
+		return
+	}
+	fmt.Println("Current working directory:", currentDir)
+
 	ctx := context.Background()
 
 	// Read and execute SQL script from wborderfile.sql

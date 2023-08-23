@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"os"
 	"time"
 )
 
@@ -14,7 +15,7 @@ type OrderRepo struct {
 }
 
 func NewOrderRepo(ctx context.Context, db *database.DataBase) (*OrderRepo, error) {
-	newCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	/*newCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	for {
 		select {
@@ -23,18 +24,27 @@ func NewOrderRepo(ctx context.Context, db *database.DataBase) (*OrderRepo, error
 		default:
 			return &OrderRepo{db: db}, nil
 		}
-	}
+	}*/
 	//or i could use this
-	/*ctx, cancel:= context.WithTimeout(context.Background(), 15 * time.Second)
+	//ctx, cancel:= context.WithTimeout(context.Background(), 15 * time.Second)
+	//defer cancel()
+	newCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
+	dbConfig := database.DBconfig{
+		DBUser:       os.Getenv("DB_USER"),
+		DBPassword:   os.Getenv("DB_PASSWORD"),
+		DBName:       os.Getenv("DB_NAME"),
+		DBSchemeName: os.Getenv("DB_SCHEME_NAME"),
+	}
+	db, err := database.NewDataBase(dbConfig)
 	return &OrderRepo{db: db}, nil
-	*/
+
 }
 
 //upsert, getById
 
 // on conflict, сделать чтоб норм работало с базой, без коллизий
-func (or *OrderRepo) Upsert(ctx context.Context, order models.Order) error {
+/*func (or *OrderRepo) Upsert(ctx context.Context, order models.Order) error {
 	//inserting data into my database
 	select {
 	case <-ctx.Done():
@@ -44,7 +54,7 @@ func (or *OrderRepo) Upsert(ctx context.Context, order models.Order) error {
 		if err != nil {
 			return err
 		}
-		tx, err := or.db.Conn.BeginTx(ctx, nil)
+		tx, err := or.db.Conn.BeginTx(ctx, &sql.TxOptions{})
 		if err != nil {
 			return err
 		}
@@ -60,6 +70,28 @@ func (or *OrderRepo) Upsert(ctx context.Context, order models.Order) error {
 		}
 		return tx.Commit()
 	}
+}*/
+func (or *OrderRepo) Upsert(ctx context.Context, order models.Order) error {
+	orderData, err := json.Marshal(order.Data)
+	if err != nil {
+		return err
+	}
+
+	// Создаем контекст с установленным сроком действия
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	// Используем контекст для выполнения запроса
+	_, err = or.db.Conn.ExecContext(ctxWithTimeout,
+		"INSERT INTO orders (order_uid, date_created, data)"+
+			"VALUES($1, $2, $3)",
+		order.OrderUID, order.DateCreated, orderData,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (or *OrderRepo) GetById(ctx context.Context, orderUID models.Order) (*models.Order, error) {
