@@ -18,10 +18,12 @@ type DataBase struct {
 //some info for database
 
 type DBconfig struct {
-	DBUser       string //:= os.Getenv("wbadmin")
-	DBPassword   string //:= os.Getenv("19az%&ty56")
-	DBName       string //:= os.Getenv("wborderbase")
-	DBSchemeName string //:= "wborderscheme"
+	DBUser       string
+	DBPassword   string
+	DBName       string
+	DBSchemeName string
+	DBHost       string
+	DBPort       string
 	//string for connection - easy to modify
 	//connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable search_path=%s", dbUser, dbPassword, dbName, schemeName)
 }
@@ -71,10 +73,12 @@ func NewDataBase(config DBconfig) (*DataBase, error) {
 		DBUser:       os.Getenv("DB_USER"),
 		DBPassword:   os.Getenv("DB_PASSWORD"),
 		DBName:       os.Getenv("DB_NAME"),
-		DBSchemeName: os.Getenv("DB_SHEME_NAME"),
+		DBSchemeName: os.Getenv("DB_SCHEME_NAME"),
+		DBHost:       os.Getenv("DB_HOST"),
+		DBPort:       os.Getenv("DB_PORT"),
 	}
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable search_path=%s",
-		dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBName, dbConfig.DBSchemeName)
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable search_path=%s host=%s port=%s",
+		dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBName, dbConfig.DBSchemeName, dbConfig.DBHost, dbConfig.DBPort)
 	//connecting to my database
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil {

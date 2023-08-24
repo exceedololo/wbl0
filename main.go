@@ -6,6 +6,8 @@ import (
 	"bwTechLvl0/internal/repositories"
 	"context"
 	"fmt"
+	"github.com/joho/godotenv"
+	"log"
 	"os"
 	"sync"
 	"time"
@@ -17,6 +19,11 @@ var cacheMutex sync.RWMutex
 
 func main() {
 	//dbUser := os.Getenv("DB_USER")
+	err := godotenv.Load("/home/alex/GolandProjects/WB/bwTechLvl0/internal/database/config.env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	currentDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Error getting current working directory:", err)
@@ -40,6 +47,8 @@ func main() {
 		DBPassword:   os.Getenv("DB_PASSWORD"),
 		DBName:       os.Getenv("DB_NAME"),
 		DBSchemeName: os.Getenv("DB_SCHEME_NAME"),
+		DBHost:       os.Getenv("DB_HOST"),
+		DBPort:       os.Getenv("DB_PORT"),
 	}
 
 	//creating an example of database
@@ -50,7 +59,7 @@ func main() {
 	}
 
 	//creating repositories
-	repo, err := repositories.NewOrderRepo(ctx, db)
+	repo, err := repositories.NewOrderRepo( /*ctx,*/ db)
 	if err != nil {
 		fmt.Println("Error creating repository:", err)
 		return

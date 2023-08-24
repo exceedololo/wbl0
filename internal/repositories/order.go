@@ -4,9 +4,11 @@ import (
 	"bwTechLvl0/internal/database"
 	"bwTechLvl0/internal/models"
 	"context"
-	"database/sql"
+	"errors"
+	"github.com/jackc/pgx/v4"
+
+	//"database/sql"
 	"encoding/json"
-	"os"
 	"time"
 )
 
@@ -14,7 +16,7 @@ type OrderRepo struct {
 	db *database.DataBase
 }
 
-func NewOrderRepo(ctx context.Context, db *database.DataBase) (*OrderRepo, error) {
+func NewOrderRepo( /*ctx context.Context,*/ db *database.DataBase) (*OrderRepo, error) {
 	/*newCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	for {
@@ -28,15 +30,6 @@ func NewOrderRepo(ctx context.Context, db *database.DataBase) (*OrderRepo, error
 	//or i could use this
 	//ctx, cancel:= context.WithTimeout(context.Background(), 15 * time.Second)
 	//defer cancel()
-	newCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	dbConfig := database.DBconfig{
-		DBUser:       os.Getenv("DB_USER"),
-		DBPassword:   os.Getenv("DB_PASSWORD"),
-		DBName:       os.Getenv("DB_NAME"),
-		DBSchemeName: os.Getenv("DB_SCHEME_NAME"),
-	}
-	db, err := database.NewDataBase(dbConfig)
 	return &OrderRepo{db: db}, nil
 
 }
@@ -82,7 +75,7 @@ func (or *OrderRepo) Upsert(ctx context.Context, order models.Order) error {
 	defer cancel()
 
 	// Используем контекст для выполнения запроса
-	_, err = or.db.Conn.ExecContext(ctxWithTimeout,
+	_, err = or.db.Conn.Exec(ctxWithTimeout,
 		"INSERT INTO orders (order_uid, date_created, data)"+
 			"VALUES($1, $2, $3)",
 		order.OrderUID, order.DateCreated, orderData,
@@ -95,24 +88,28 @@ func (or *OrderRepo) Upsert(ctx context.Context, order models.Order) error {
 }
 
 func (or *OrderRepo) GetById(ctx context.Context, orderUID models.Order) (*models.Order, error) {
-	select {
+	/*select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
 		row := or.db.Conn.QueryRowContext(ctx,
 			"SELECT order_uid, date_created, data FROM orders WHERE order_uid = $1",
 			orderUID,
-		)
-		var order models.Order
-		var orderData json.RawMessage
-		err := row.Scan(&order.OrderUID, &order.DateCreated, &orderData)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				return nil, nil //there is no order with this uid
-			}
-			return nil, err
+		)*/
+	var order models.Order
+	var orderData json.RawMessage
+	err := or.db.Conn.QueryRow(ctx,
+		"SELECT order_uid, date_created, data FROM orders WHERE order_uid= $1",
+		orderUID,
+	).Scan(&order.OrderUID, &order.DateCreated, &orderData)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil //there is no order with this uid
 		}
-		order.Data = orderData
-		return &order, nil
+		return nil, err
 	}
+	order.Data = orderData
+	return &order, nil
 }
+
+//}
