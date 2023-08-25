@@ -6,8 +6,6 @@ import (
 	"bwTechLvl0/internal/repositories"
 	"context"
 	"fmt"
-	"github.com/joho/godotenv"
-	"log"
 	"os"
 	"sync"
 	"time"
@@ -19,10 +17,6 @@ var cacheMutex sync.RWMutex
 
 func main() {
 	//dbUser := os.Getenv("DB_USER")
-	err := godotenv.Load("/home/alex/GolandProjects/WB/bwTechLvl0/internal/database/config.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	currentDir, err := os.Getwd()
 	if err != nil {
@@ -34,12 +28,12 @@ func main() {
 	ctx := context.Background()
 
 	// Read and execute SQL script from wborderfile.sql
-	sqlFile, err := os.Open("wborderfile.sql")
+	/*sqlFile, err := os.Open("wborderfile.sql")
 	if err != nil {
 		fmt.Println("Error opening SQL file:", err)
 		return
 	}
-	defer sqlFile.Close()
+	defer sqlFile.Close()*/
 
 	//
 	config := database.DBconfig{
@@ -48,7 +42,6 @@ func main() {
 		DBName:       os.Getenv("DB_NAME"),
 		DBSchemeName: os.Getenv("DB_SCHEME_NAME"),
 		DBHost:       os.Getenv("DB_HOST"),
-		DBPort:       os.Getenv("DB_PORT"),
 	}
 
 	//creating an example of database

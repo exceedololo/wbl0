@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	"log"
-	"os"
 )
 
 //tolko soedinenie
@@ -23,45 +22,7 @@ type DBconfig struct {
 	DBName       string
 	DBSchemeName string
 	DBHost       string
-	DBPort       string
-	//string for connection - easy to modify
-	//connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable search_path=%s", dbUser, dbPassword, dbName, schemeName)
 }
-
-/*func NewDataBase(config DBconfig) (*DataBase, error) {
-	//connecting to .env to get credentials
-	err := godotenv.Load()
-	if err != nil {
-		return nil, err
-	}
-	dbConfig := DBconfig{
-		DBUser:       os.Getenv("DB_USER"),
-		DBPassword:   os.Getenv("DB_PASSWORD"),
-		DBName:       os.Getenv("DB_NAME"),
-		DBSchemeName: os.Getenv("DB_SHEME_NAME"),
-	}
-	connStr := fmt.Sprintf("user=%s passwprd=%s dbname=%s sslmode=disable search_path=%s",
-		dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBName, dbConfig.DBSchemeName)
-
-	//connecting to my database
-	conn, err := pgx.Connect(context.Background(), connStr)
-	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
-	}
-	defer conn.Close(context.Background())
-
-	// Creating a context with a timeout of 1 second
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	//checking the connection
-	err = conn.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("The connection has been accomplished")
-	return &DataBase{Conn: conn}, nil
-}*/
 
 func NewDataBase(config DBconfig) (*DataBase, error) {
 	//connecting to .env to get credentials
@@ -69,16 +30,15 @@ func NewDataBase(config DBconfig) (*DataBase, error) {
 	if err != nil {
 		return nil, err
 	}*/
-	dbConfig := DBconfig{
+	/*dbConfig := DBconfig{
 		DBUser:       os.Getenv("DB_USER"),
 		DBPassword:   os.Getenv("DB_PASSWORD"),
 		DBName:       os.Getenv("DB_NAME"),
 		DBSchemeName: os.Getenv("DB_SCHEME_NAME"),
 		DBHost:       os.Getenv("DB_HOST"),
-		DBPort:       os.Getenv("DB_PORT"),
-	}
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable search_path=%s host=%s port=%s",
-		dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBName, dbConfig.DBSchemeName, dbConfig.DBHost, dbConfig.DBPort)
+	}*/
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable search_path=%s host=%s",
+		config.DBUser, config.DBPassword, config.DBName, config.DBSchemeName, config.DBHost)
 	//connecting to my database
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil {
