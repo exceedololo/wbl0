@@ -17,28 +17,19 @@ type DataBase struct {
 //some info for database
 
 type DBconfig struct {
+	DBHost       string
+	DBPort       string
 	DBUser       string
 	DBPassword   string
 	DBName       string
 	DBSchemeName string
-	DBHost       string
 }
 
 func NewDataBase(config DBconfig) (*DataBase, error) {
-	//connecting to .env to get credentials
-	/*err := godotenv.Load("/home/alex/GolandProjects/WB/bwTechLvl0/database/config.env")
-	if err != nil {
-		return nil, err
-	}*/
-	/*dbConfig := DBconfig{
-		DBUser:       os.Getenv("DB_USER"),
-		DBPassword:   os.Getenv("DB_PASSWORD"),
-		DBName:       os.Getenv("DB_NAME"),
-		DBSchemeName: os.Getenv("DB_SCHEME_NAME"),
-		DBHost:       os.Getenv("DB_HOST"),
-	}*/
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable search_path=%s host=%s",
-		config.DBUser, config.DBPassword, config.DBName, config.DBSchemeName, config.DBHost)
+
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable search_path=%s",
+		config.DBHost, config.DBPort,
+		config.DBUser, config.DBPassword, config.DBName, config.DBSchemeName)
 	//connecting to my database
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil {

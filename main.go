@@ -6,6 +6,8 @@ import (
 	"bwTechLvl0/internal/repositories"
 	"context"
 	"fmt"
+	"github.com/joho/godotenv"
+	"log"
 	"os"
 	"sync"
 	"time"
@@ -17,6 +19,11 @@ var cacheMutex sync.RWMutex
 
 func main() {
 	//dbUser := os.Getenv("DB_USER")
+
+	err := godotenv.Load("C:/Projects/Go/wbl0/internal/database/config.env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	currentDir, err := os.Getwd()
 	if err != nil {
@@ -37,11 +44,12 @@ func main() {
 
 	//
 	config := database.DBconfig{
+		DBHost:       os.Getenv("DB_HOST"),
+		DBPort:       os.Getenv("DB_PORT"),
 		DBUser:       os.Getenv("DB_USER"),
 		DBPassword:   os.Getenv("DB_PASSWORD"),
 		DBName:       os.Getenv("DB_NAME"),
 		DBSchemeName: os.Getenv("DB_SCHEME_NAME"),
-		DBHost:       os.Getenv("DB_HOST"),
 	}
 
 	//creating an example of database
