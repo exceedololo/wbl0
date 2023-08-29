@@ -8,14 +8,14 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"log"
+	"net"
 	"os"
-	"sync"
 	"time"
 )
 
 // global variable used for caching data
-var dataCache map[string]models.Order
-var cacheMutex sync.RWMutex
+/*var dataCache map[string]models.Order
+var cacheMutex sync.RWMutex*/
 
 func main() {
 	//dbUser := os.Getenv("DB_USER")
@@ -34,25 +34,30 @@ func main() {
 
 	ctx := context.Background()
 
-	// Read and execute SQL script from wborderfile.sql
-	/*sqlFile, err := os.Open("wborderfile.sql")
+	//
+	//host.docker.internal
+	config := database.DBconfig{
+		DBHost:     os.Getenv("DB_HOST"),
+		DBPort:     os.Getenv("DB_PORT"),
+		DBUser:     os.Getenv("DB_USER"),
+		DBPassword: os.Getenv("DB_PASSWORD"),
+		DBName:     os.Getenv("DB_NAME"),
+	}
+	host := "host.docker.internal"
+	port := "5432"
+
+	timeout := time.Second * 2
+	conn, err := net.DialTimeout("tcp", host+":"+port, timeout)
 	if err != nil {
-		fmt.Println("Error opening SQL file:", err)
+		fmt.Println("Connection failed:", err)
 		return
 	}
-	defer sqlFile.Close()*/
+	defer conn.Close()
 
-	//
-	config := database.DBconfig{
-		DBHost:       os.Getenv("DB_HOST"),
-		DBPort:       os.Getenv("DB_PORT"),
-		DBUser:       os.Getenv("DB_USER"),
-		DBPassword:   os.Getenv("DB_PASSWORD"),
-		DBName:       os.Getenv("DB_NAME"),
-		DBSchemeName: os.Getenv("DB_SCHEME_NAME"),
-	}
+	fmt.Println("Connection successful!")
 
 	//creating an example of database
+	time.Sleep(5 * time.Second)
 	db, err := database.NewDataBase(config)
 	if err != nil {
 		fmt.Println("Error creating database connection:", err)
@@ -78,12 +83,38 @@ func main() {
 		return
 	}
 
-	foundOrder, err := repo.GetById(ctx, order)
+	foundOrder, err := repo.GetById(ctx, order.OrderUID)
 	if err != nil {
 		fmt.Println("Error getting order by ID:", err)
 		return
 	}
 	fmt.Println("Found order:", foundOrder)
+	/*
+		// Пример добавления записи в базу данных
+		orderToAdd := models.Order{
+			OrderUID:    "your_order_uid",
+			DateCreated: time.Now(),
+			Data:        []byte(`{"key": "value"}`),
+		}
+		err = repo.Upsert(context.Background(), orderToAdd)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Пример получения записи из базы данных по идентификатору
+		orderToRetrieve := models.Order{
+			OrderUID: "your_order_uid",
+		}
+		retrievedOrder, err := repo.GetById(context.Background(), orderToRetrieve)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if retrievedOrder == nil {
+			fmt.Println("Order not found")
+		} else {
+			fmt.Printf("Retrieved Order: %+v\n", retrievedOrder)
+		}*/
+
 	//starting database and NATS-stream
 	//db, sc := initialize()
 

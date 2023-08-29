@@ -37,33 +37,6 @@ func NewOrderRepo( /*ctx context.Context,*/ db *database.DataBase) (*OrderRepo, 
 //upsert, getById
 
 // on conflict, сделать чтоб норм работало с базой, без коллизий
-/*func (or *OrderRepo) Upsert(ctx context.Context, order models.Order) error {
-	//inserting data into my database
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-		orderData, err := json.Marshal(order.Data)
-		if err != nil {
-			return err
-		}
-		tx, err := or.db.Conn.BeginTx(ctx, &sql.TxOptions{})
-		if err != nil {
-			return err
-		}
-		defer tx.Rollback()
-		_, err = tx.ExecContext(ctx,
-			"INSERT INTO orders (order_uid, date_created, data)"+
-				"VALUES($1, $2, $3)"+
-				"ON CONFLICT (order_uid) DO UPDATE SET date_created = EXCLUDED.date_created, data = EXCLUDED.data",
-			order.OrderUID, order.DateCreated, orderData,
-		)
-		if err != nil {
-			return err
-		}
-		return tx.Commit()
-	}
-}*/
 func (or *OrderRepo) Upsert(ctx context.Context, order models.Order) error {
 	orderData, err := json.Marshal(order.Data)
 	if err != nil {
@@ -87,7 +60,7 @@ func (or *OrderRepo) Upsert(ctx context.Context, order models.Order) error {
 	return nil
 }
 
-func (or *OrderRepo) GetById(ctx context.Context, orderUID models.Order) (*models.Order, error) {
+func (or *OrderRepo) GetById(ctx context.Context, orderUID string) (*models.Order, error) {
 	/*select {
 	case <-ctx.Done():
 		return nil, ctx.Err()

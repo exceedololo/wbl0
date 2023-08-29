@@ -1,0 +1,7 @@
+зайдя в корневую папку с проектом нужно запустить команду сборки образа
+docker build -t wb-container-psql .
+после успешного завершения сборки нужно запустить контейнер на его основе 
+docker run -d -p 5432:5432 --name my-postgres-container-new wb-container-psql
+для проверки ввести 
+docker ps -
+после чего можно в приложении Docker Desktop включить контейнер
