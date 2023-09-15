@@ -25,9 +25,12 @@ type DBconfig struct {
 
 func NewDataBase(config DBconfig) (*DataBase, error) {
 
-	connStr := fmt.Sprintf("postgres://wbadmin:19azty56@localhost:5432/wborderbase") /*,
+	/*connStr := fmt.Sprintf("postgres://wbadmin:19azty56@localhost:5432/wborderdb")*/ /*,
 	config.DBUser, config.DBPassword, config.DBHost, config.DBPort, config.DBName*/
 	//connecting to my database
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable",
+		config.DBUser, config.DBPassword, config.DBName, config.DBHost, config.DBPort)
+
 	fmt.Println("DBHost:", config.DBHost)
 	fmt.Println("DBPort:", config.DBPort)
 	fmt.Println("DBUser:", config.DBUser)
@@ -38,11 +41,11 @@ func NewDataBase(config DBconfig) (*DataBase, error) {
 	if err != nil {
 		log.Fatalf("Error connecting to database: %v", err)
 	}
-	defer conn.Close(context.Background())
 
 	//checking the connection
 	err = conn.Ping(context.Background())
 	if err != nil {
+		conn.Close(context.Background())
 		log.Fatal(err)
 	}
 	fmt.Println("The connection has been accomplished")

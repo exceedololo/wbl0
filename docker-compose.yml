@@ -1,0 +1,19 @@
+version: '3'
+services:
+  postgres:
+    image: wb-postgres
+    build:
+      context: .
+      dockerfile: Dockerfile-postgres
+    ports:
+      - "5433:5432"  # Проброс порта для доступа к PostgreSQL
+
+  nats:
+    build:
+      context: .
+      dockerfile: Dockerfile-nats
+    image: nats-streaming
+    ports:
+      - "4222:4222"  # Проброс порта для доступа к NATS Streaming
+    volumes:
+      - ./nats-streaming.conf:/etc/nats/nats-streaming.conf

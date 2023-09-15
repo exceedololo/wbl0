@@ -10,6 +10,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -20,9 +22,17 @@ var cacheMutex sync.RWMutex*/
 func main() {
 	//dbUser := os.Getenv("DB_USER")
 
-	err := godotenv.Load("C:/Projects/Go/wbl0/internal/database/config.env")
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		log.Fatal("Failed to get current file path")
+	}
+
+	dir := filepath.Dir(filename)
+	envFilePath := filepath.Join(dir, "internal", "database", "config.env")
+
+	err := godotenv.Load(envFilePath)
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file:", err)
 	}
 
 	currentDir, err := os.Getwd()
@@ -35,7 +45,7 @@ func main() {
 	ctx := context.Background()
 
 	//
-	//host.docker.internal
+	//host.docker.internal or localhost
 	config := database.DBconfig{
 		DBHost:     os.Getenv("DB_HOST"),
 		DBPort:     os.Getenv("DB_PORT"),
@@ -43,8 +53,8 @@ func main() {
 		DBPassword: os.Getenv("DB_PASSWORD"),
 		DBName:     os.Getenv("DB_NAME"),
 	}
-	host := "host.docker.internal"
-	port := "5432"
+	host := "localhost"
+	port := "5433"
 
 	timeout := time.Second * 2
 	conn, err := net.DialTimeout("tcp", host+":"+port, timeout)
@@ -70,14 +80,14 @@ func main() {
 		fmt.Println("Error creating repository:", err)
 		return
 	}
-
+	fmt.Printf("OrderRepo: %+v\n", *repo)
 	//example of using methods of "repositories"
 	order := models.Order{
 		OrderUID:    "order123",
 		DateCreated: time.Now(),
 		Data:        []byte(`{"key": "value"}`),
 	}
-	err = repo.Upsert(ctx, models.Order{})
+	err = repo.Upsert(ctx, order)
 	if err != nil {
 		fmt.Println("Error upserting order:", err)
 		return

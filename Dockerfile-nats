@@ -1,0 +1,11 @@
+# Используем официальный образ NATS Streaming
+FROM nats-streaming
+
+# Открываем порт для подключения к NATS Streaming
+EXPOSE 4222
+
+# Устанавливаем переменные окружения для NATS Streaming
+COPY nats-streaming.conf /etc/nats/nats-streaming.conf
+
+# Запускаем NATS Streaming Server
+CMD ["nats-streaming-server", "-sc", "/etc/nats/nats-streaming.conf"]

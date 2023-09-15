@@ -17,28 +17,13 @@ func NewConnection(clusterID, clientID, natsURL string) (*NATSConnection, error)
 	}
 	fmt.Println("Connected to NATS Streaming")
 	return &NATSConnection{Conn: conn}, nil
-	/*_, err := n.sc.Subscribe(n.channel, func(msg *stan.Msg) {
-		var orderData Order
-		err := json.Unmarshal(msg.Data, &orderData)
-		if err != nil {
-			log.Println("Error decoding message:", err)
-			return
-		}
+}
 
-		if n.handlerFunc != nil {
-			err = n.handlerFunc(orderData)
-			if err != nil {
-				log.Println("Error processing message:", err)
-				return
-			}
-		}
+func (n *NATSConnection) Subscribe(channelName string, callback func([]byte)) (stan.Subscription, error) {
+	return n.Conn.Subscribe(channelName, func(msg *stan.Msg) {
+		// Вызываем функцию обратного вызова и передаем ей данные из сообщения
+		callback(msg.Data)
 	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil*/
 }
 
 // Closing connection wuth a NATS-stream
